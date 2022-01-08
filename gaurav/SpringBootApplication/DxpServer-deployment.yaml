@@ -1,0 +1,55 @@
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: dxpserver
+  namespace: dxp
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: dxpserver
+  template: 
+    metadata: 
+      labels: 
+        app: dxpserver
+    spec:
+      hostname: dxp1  
+      imagePullSecrets: 
+        - name: dxpsecret
+      containers: 
+        - name: dxpserver
+          image: dxpregistry:5000/050120220541/dxpserver:latest
+
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env: 
+            - 
+              name: DATABASE_USER
+              valueFrom: 
+                secretKeyRef: 
+                  name: postgresdb-secret
+                  key: postgresdb-username
+            - 
+              name: DATABASE_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: postgresdb-secret                 
+                  key: postgresdb-password                  
+            - 
+              name: DATABASE_URL
+              valueFrom: 
+                configMapKeyRef:
+                  name: dxpserver-config                
+                  key: jdbc_url           
+          
+
+          volumeMounts:
+          - mountPath: /opt/DxpShared
+            name: dxpshared
+      restartPolicy: Always
+      volumes:
+      - name: dxpshared
+        persistentVolumeClaim:
+          claimName: dxpsharedpvc

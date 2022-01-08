@@ -1,0 +1,51 @@
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: postgres
+  namespace: dxp
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: db-server
+  template: 
+    metadata: 
+      labels: 
+        app: db-server
+    spec: 
+      containers: 
+        - 
+          env: 
+            - 
+              name: POSTGRES_USER
+              valueFrom: 
+                secretKeyRef: 
+                  name: postgresdb-secret
+                  key: postgresdb-username
+            - 
+              name: POSTGRES_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: postgresdb-secret                 
+                  key: postgresdb-password                  
+            - 
+              name: POSTGRES_DB
+              value: ibpmdb
+          image: "postgres:11.9-alpine"
+          imagePullPolicy: IfNotPresent
+          name: db-server
+          ports: 
+            - 
+              containerPort: 5432
+          volumeMounts: 
+            - 
+              mountPath: /var/lib/postgresql
+              name: postgredb
+      hostname: db-server
+      volumes: 
+        - 
+          name: postgredb
+          persistentVolumeClaim: 
+            claimName: postgres-pv-claim
+

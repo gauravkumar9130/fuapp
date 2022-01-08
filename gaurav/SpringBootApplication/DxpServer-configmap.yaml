@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dxpserver-config
+  namespace: dxp
+  labels:
+    app: dxpserver-config
+data:
+  jdbc_url: jdbc:postgresql://postgres-service/ibpmdb
+  
+
